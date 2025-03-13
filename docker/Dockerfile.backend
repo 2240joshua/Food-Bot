@@ -1,35 +1,20 @@
-# Use a lightweight Python image
+# Use Python image
 FROM python:3.10
-
-# Set the working directory inside the container
-WORKDIR /app
-
-# Copy the project files into the container
-COPY backend/ .
-
-# Install dependencies
-RUN pip install -r requirements.txt
-
-# Expose the backend API port
-EXPOSE 8000
-
-# Run the FastAPI server
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
-# Use a lightweight Node.js image
-FROM node:18
 
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and install dependencies
-COPY backend/package.json .
-RUN npm install
+# Copy the requirements file
+COPY requirements.txt .
 
-# Copy rest of the project files
-COPY backend/ .
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the API port
-EXPOSE 3000
+# Copy the rest of the app
+COPY . .
 
-# Start the Node.js server
-CMD ["node", "server.js"]
+# Expose FastAPI port
+EXPOSE 8000
+
+# Run FastAPI server
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
