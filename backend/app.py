@@ -4,6 +4,7 @@ from backend.routes.user import router as user_router
 from fastapi.middleware.cors import CORSMiddleware
 from backend.routes.auth import router as auth_router
 from backend.routes.auth import router as auth_router
+from backend.routes.recipes import router as recipes_router
 app = FastAPI()
 
 
@@ -12,6 +13,7 @@ app.include_router(auth_router)
 app.include_router(recommend_router)
 app.include_router(user_router)
 app.include_router(auth_router)
+app.include_router(recipes_router)
 @app.get("/")
 def home():
     return {"message": "Welcome to Food Recommendation API"}
