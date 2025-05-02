@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import MealSearch from "./MealSearch";
 import UploadMeal from "./UploadMeal";
 import MyUploads from "./MyUploads";
@@ -7,20 +7,50 @@ import MealPlanner from "./MealPlanner";
 
 function DashboardTabs({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState("profile");
-  const plannerRef = useRef(null);
+  const [selectedDay, setSelectedDay] = useState("Monday");
+  const [plannedMeals, setPlannedMeals] = useState({});
+
+  const addMeal = (meal) => {
+    setPlannedMeals((prev) => {
+      const dayMeals = prev[selectedDay] || [];
+      return {
+        ...prev,
+        [selectedDay]: [...dayMeals, meal],
+      };
+    });
+  };
 
   const renderTab = () => {
     switch (activeTab) {
       case "profile":
         return <UserProfile user={user} />;
+
       case "search":
-        return <MealSearch onAddMeal={(meal) => plannerRef.current && plannerRef.current(meal)} />;
+        return (
+          <MealSearch
+            onAddMeal={(meal) => addMeal(meal)}
+          />
+        );
+
       case "upload":
         return <UploadMeal />;
+
       case "uploads":
-        return <MyUploads onAddMeal={(meal) => plannerRef.current && plannerRef.current(meal)} />;
+        return (
+          <MyUploads
+            onAddMeal={(meal) => addMeal(meal)}
+          />
+        );
+
       case "planner":
-        return <MealPlanner addMealExternal={plannerRef} />;
+        return (
+          <MealPlanner
+            plannedMeals={plannedMeals}
+            selectedDay={selectedDay}
+            setSelectedDay={setSelectedDay}
+          />
+        );
+
       default:
         return null;
     }

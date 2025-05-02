@@ -17,18 +17,28 @@ def fetch_recipes(query="", ingredients="", cuisine="", diet="", max_ready_time=
         "number": number,
         "instructionsRequired": True,
         "addRecipeInformation": True,
+        "addRecipeNutrition": True,  # ✅ This ensures calories, protein, fat, carbs are included
         "apiKey": SPOONACULAR_API_KEY,
     }
 
     response = requests.get(BASE_URL, params=params)
 
     if response.status_code == 200:
-        return response.json().get("results", [])
+        recipes = response.json().get("results", [])
+
+        # ✅ Prepare simplified recipe list with nutrition extracted
+        result = []
+        for recipe in recipes:
+            nutrition = {n['title'].lower(): n['amount'] for n in recipe.get("nutrition", {}).get("nutrients", [])}
+            result.append({
+                "title": recipe.get("title"),
+                "calories": nutrition.get("calories", 0),
+                "protein": nutrition.get("protein", 0),
+                "carbs": nutrition.get("carbohydrates", 0),
+                "fat": nutrition.get("fat", 0),
+            })
+
+        return result
     else:
         print(f"Error: {response.status_code}, {response.text}")
         return []
-
-# ✅ Main block to test
-if __name__ == "__main__":
-    recipes = fetch_recipes(query="chicken")
-    print(recipes)

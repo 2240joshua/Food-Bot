@@ -1,28 +1,6 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React from "react";
 
-function MealPlanner({ addMealExternal }) {
-  const [selectedDay, setSelectedDay] = useState("Monday");
-  const [plannedMeals, setPlannedMeals] = useState({});
-
-  const addMeal = useCallback((meal) => {
-    setPlannedMeals((prev) => {
-      const dayMeals = prev[selectedDay] || [];
-      return {
-        ...prev,
-        [selectedDay]: [...dayMeals, meal],
-      };
-    });
-  }, [selectedDay]);
-
-  useEffect(() => {
-    // ✅ FIXED: skip if addMealExternal is not ready (during login or logout)
-    if (!addMealExternal || !addMealExternal.current) return;
-
-    addMealExternal.current = (meal) => {
-      addMeal(meal);
-    };
-  }, [addMeal, addMealExternal, selectedDay]);
-
+function MealPlanner({ plannedMeals, selectedDay, setSelectedDay }) {
   const getTotals = () => {
     const meals = plannedMeals[selectedDay] || [];
     return meals.reduce(
