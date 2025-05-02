@@ -16,4 +16,4 @@ class UserMeal(Base):
     fat = Column(Float)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    user = relationship("User", back_populates="meals")
+    user = relationship("User", back_populates="meals")  # This will resolve properly at runtime

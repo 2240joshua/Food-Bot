@@ -5,9 +5,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.routes.auth import router as auth_router
 from backend.routes.auth import router as auth_router
 from backend.routes.recipes import router as recipes_router
+from backend.routes.meals import router as meals_router
+
 app = FastAPI()
 
-
+app.include_router(meals_router)
 app.include_router(auth_router)
 # Include API routes
 app.include_router(recommend_router)

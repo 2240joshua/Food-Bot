@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import './App.css';
 import Login from "./Login";
-import UserProfile from "./UserProfile";
+import Header from "./Header";
+import DashboardTabs from "./DashboardTabs";
 
 function App() {
   const [formData, setFormData] = useState({
@@ -64,12 +65,7 @@ function App() {
 
   return (
     <div>
-      {user ? (
-        <div className="container">
-          <button onClick={handleLogout} className="button">Logout</button>
-          <UserProfile user={user} />
-        </div>
-      ) : (
+      {user === null ? (
         <>
           <Login setUser={setUser} />
           <div className="container">
@@ -107,6 +103,13 @@ function App() {
               <button type="submit" className="button">Register</button>
             </form>
             <p>{responseMessage}</p>
+          </div>
+        </>
+      ) : (
+        <>
+          <Header onLogout={handleLogout} />
+          <div className="container">
+            <DashboardTabs user={user} onLogout={handleLogout} />
           </div>
         </>
       )}

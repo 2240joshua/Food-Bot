@@ -1,7 +1,13 @@
 # Food Bot
+Run program by:
+run backend 
+
+uvicorn backend.app:app --reload
 
 
-
+run frontend:
+cd frontend
+npm start
 ## Getting started
 
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.

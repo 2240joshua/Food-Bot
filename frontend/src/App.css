@@ -42,3 +42,41 @@ p {
   margin-top: 1rem;
   font-weight: bold;
 }
+.tab-nav {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  justify-content: center;
+  background-color: #f8f8f8;
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.tab-nav button {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  background-color: #eee;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  font-weight: 500;
+  color: #333;
+}
+
+.tab-nav button:hover {
+  background-color: #ddd;
+  transform: translateY(-2px);
+}
+
+.tab-nav button.active {
+  background-color: #007BFF;
+  color: white;
+}
+
+.tab-content {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}

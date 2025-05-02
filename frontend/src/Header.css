@@ -1,0 +1,26 @@
+.header {
+    background-color: #333;
+    padding: 1rem;
+  }
+  
+  .nav-list {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .nav-list a, .logout-button {
+    color: white;
+    text-decoration: none;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .nav-list a:hover, .logout-button:hover {
+    text-decoration: underline;
+  }
+  
