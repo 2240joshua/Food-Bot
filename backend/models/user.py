@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from .database import Base  # Adjust path based on your structure
+from backend.models.database import Base
 
 class User(Base):
     __tablename__ = "users"
@@ -10,4 +10,6 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     dietary_preferences = Column(String, nullable=True)
 
-    meals = relationship("UserMeal", back_populates="user")  # String reference avoids circular import
+    # ADD THESE (for back_populates relationships)
+    meals = relationship("UserMeal", back_populates="user")  # <-- if you have user_meals.py
+    recipes = relationship("UserRecipe", back_populates="user")  # <-- if you have user_recipe.py

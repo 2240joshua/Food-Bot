@@ -1,7 +1,13 @@
-from models.database import Base, engine
-from models import user, recipe, user_meal  # ⬅️ ensures models are registered
+# backend/init_db.py
 
-# Create all tables defined in Base subclasses
+from backend.models.database import Base, engine
+from backend.models import user, recipe, user_recipe, user_meal  # make sure all models are imported
+
+# 🚨 DEV MODE: Drop all tables and recreate them (this wipes data)
+print("Dropping existing tables...")
+Base.metadata.drop_all(bind=engine)
+
+print("Creating tables...")
 Base.metadata.create_all(bind=engine)
 
-print("✅ Database tables created.")
+print("✅ AWS Database tables recreated successfully.")

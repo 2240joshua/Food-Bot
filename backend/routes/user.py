@@ -16,14 +16,14 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/users/")
+@router.post("/users/", response_model=dict)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     # Check if email already exists
-    existing = db.query(User).filter(User.email == user.email).first()
-    if existing:
+    existing_user = db.query(User).filter(User.email == user.email).first()
+    if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # Create and save user
+    # Create new user
     new_user = User(
         name=user.name,
         email=user.email,
@@ -32,13 +32,20 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return new_user
-@router.get("/users/{user_id}")
+
+    return {
+        "id": new_user.id,
+        "name": new_user.name,
+        "email": new_user.email,
+        "dietary_preferences": new_user.dietary_preferences
+    }
+
+@router.get("/users/{user_id}", response_model=dict)
 def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     return {
         "id": user.id,
         "name": user.name,

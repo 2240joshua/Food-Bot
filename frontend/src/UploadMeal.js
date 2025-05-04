@@ -28,7 +28,8 @@ function UploadMeal() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ...mealData,
+          title: mealData.title,
+          instructions: mealData.description, // ✅ fixed this!
           calories: parseFloat(mealData.calories),
           protein: parseFloat(mealData.protein),
           carbs: parseFloat(mealData.carbs),
@@ -53,7 +54,7 @@ function UploadMeal() {
       <h2>📤 Upload a Meal</h2>
       <form onSubmit={handleSubmit}>
         <input name="title" placeholder="Meal Title" value={mealData.title} onChange={handleChange} required className="input-field" /><br />
-        <textarea name="description" placeholder="Description" value={mealData.description} onChange={handleChange} className="input-field" /><br />
+        <textarea name="description" placeholder="Instructions" value={mealData.description} onChange={handleChange} className="input-field" /><br />
         <input name="calories" type="number" placeholder="Calories" value={mealData.calories} onChange={handleChange} className="input-field" /><br />
         <input name="protein" type="number" placeholder="Protein (g)" value={mealData.protein} onChange={handleChange} className="input-field" /><br />
         <input name="carbs" type="number" placeholder="Carbs (g)" value={mealData.carbs} onChange={handleChange} className="input-field" /><br />

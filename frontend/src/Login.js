@@ -17,9 +17,8 @@ function Login({ setUser }) {
       const data = await res.json();
 
       if (res.ok) {
-        localStorage.setItem("token", data.access_token); // ✅ Save token
+        localStorage.setItem("token", data.access_token);
 
-        // Now fetch the user's profile with the token
         const profileRes = await fetch("http://localhost:8000/users/me", {
           headers: {
             Authorization: `Bearer ${data.access_token}`
@@ -29,10 +28,11 @@ function Login({ setUser }) {
         const profile = await profileRes.json();
 
         if (profileRes.ok) {
-          setUser(profile); // ✅ Store the actual user info in App
+          setUser(profile);
+          localStorage.setItem("user", JSON.stringify(profile)); // ✅ STORE USER HERE
           setMessage("✅ Logged in");
         } else {
-          setMessage(`❌ Failed to get profile: ${profile.detail}`);
+          setMessage(`❌ ${profile.detail}`);
         }
       } else {
         setMessage(`❌ ${data.detail}`);
@@ -47,13 +47,12 @@ function Login({ setUser }) {
       <h1>Login</h1>
       <form onSubmit={handleLogin}>
         <input
-          className="input-field"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <button className="button" type="submit">Login</button>
+        <button type="submit">Login</button>
       </form>
       <p>{message}</p>
     </div>
