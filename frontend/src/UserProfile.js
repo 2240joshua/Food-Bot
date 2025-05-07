@@ -1,48 +1,48 @@
 import React, { useEffect, useState } from "react";
+import "./App.css";  // or a dedicated Profile.css if you prefer
 
-function UserProfile() {
-  const [user, setUser] = useState(null);
+function UserProfile({ user: initialUser }) {
+  const [user, setUser]   = useState(initialUser);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (initialUser) return;  // already passed in
     const token = localStorage.getItem("token");
-
     if (!token) {
       setError("No token found. Please log in.");
       return;
     }
 
-    const fetchUser = async () => {
+    (async () => {
       try {
         const res = await fetch("http://localhost:8000/users/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();
-
-        if (res.ok) {
-          setUser(data);
-        } else {
-          setError(data.detail || "Failed to fetch user");
-        }
-      } catch (err) {
+        if (res.ok) setUser(data);
+        else       setError(data.detail || "Failed to fetch user");
+      } catch {
         setError("❌ Network error while fetching user");
       }
-    };
+    })();
+  }, [initialUser]);
 
-    fetchUser();
-  }, []);
-
-  if (error) return <p>❌ {error}</p>;
-  if (!user) return <p>Loading profile...</p>;
+  if (error) return <p style={{ color: "red", textAlign: "center" }}>{error}</p>;
+  if (!user) return <p style={{ textAlign: "center" }}>Loading profile...</p>;
 
   return (
-    <div className="container">
-      <h2>👤 User Profile</h2>
-      <p><strong>Name:</strong> {user.name}</p>
-      <p><strong>Email:</strong> {user.email}</p>
-      <p><strong>Dietary Preferences:</strong> {user.dietary_preferences || "None"}</p>
+    <div className="profile-card">
+      <h1>👤 User Profile</h1>
+      <div className="profile-field">
+        <label>Name:</label><span>{user.name}</span>
+      </div>
+      <div className="profile-field">
+        <label>Email:</label><span>{user.email}</span>
+      </div>
+      <div className="profile-field">
+        <label>Dietary Preferences:</label>
+        <span>{user.dietary_preferences || "None"}</span>
+      </div>
     </div>
   );
 }

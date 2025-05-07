@@ -5,9 +5,11 @@ from sqlalchemy.orm import Session
 from backend.models.database import SessionLocal
 from backend.models.user import User
 from backend.schemas.user import UserCreate
-
+from passlib.context import CryptContext
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 router = APIRouter()
-
+def hash_password(password):
+    return pwd_context.hash(password)
 # Dependency to get DB session
 def get_db():
     db = SessionLocal()
@@ -25,9 +27,10 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
     # Create new user
     new_user = User(
-        name=user.name,
-        email=user.email,
-        dietary_preferences=user.dietary_preferences
+    name=user.name,
+    email=user.email,
+    password_hash=hash_password(user.password),   # <-- Hash password
+    dietary_preferences=user.dietary_preferences
     )
     db.add(new_user)
     db.commit()

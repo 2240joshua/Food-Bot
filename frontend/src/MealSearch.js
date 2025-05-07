@@ -21,6 +21,33 @@ function MealSearch({ onAddMeal }) {
     }
   };
 
+  const saveToMyRecipes = async (meal) => {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`http://localhost:8000/recipes/save?user_id=1`, { // Replace 1 with dynamic user ID if you have it
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        title: meal.title,
+        ingredients: "Imported from Spoonacular",
+        instructions: "Imported from Spoonacular",
+        calories: meal.calories || 0,
+        protein: meal.protein || 0,
+        carbs: meal.carbs || 0,
+        fat: meal.fat || 0,
+      }),
+    });
+
+    if (res.ok) {
+      alert("✅ Saved to My Recipes!");
+    } else {
+      alert("❌ Failed to save recipe");
+    }
+  };
+
   return (
     <div className="container">
       <h2>🔍 Search Meals</h2>
@@ -42,6 +69,9 @@ function MealSearch({ onAddMeal }) {
               Calories: {meal.calories} kcal<br />
               Protein: {meal.protein}g, Carbs: {meal.carbs}g, Fat: {meal.fat}g<br />
               <button onClick={() => onAddMeal(meal)} className="button-small">➕ Add to Planner</button>
+              <button onClick={() => saveToMyRecipes(meal)} className="button-small" style={{ marginLeft: "10px" }}>
+                💾 Save to My Recipes
+              </button>
             </li>
           ))}
         </ul>

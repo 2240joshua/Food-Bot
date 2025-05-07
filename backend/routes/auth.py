@@ -2,13 +2,18 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
-
 from backend.models.database import SessionLocal
 from backend.models.user import User
 from backend.utils.jwt_handler import create_access_token, verify_token
+from passlib.context import CryptContext
 
 router = APIRouter()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")  # for token validation
+
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Token auth
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 # Dependency to get DB session
 def get_db():
@@ -18,15 +23,24 @@ def get_db():
     finally:
         db.close()
 
-# Request model for login
+# Password check
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+# ------------------------------
+# 📌 Login Model (NEEDS email + password)
 class LoginRequest(BaseModel):
     email: EmailStr
+    password: str
 
-# 🔐 Login route: returns JWT token
+# ------------------------------
+# ✅ Login route
 @router.post("/login")
 def login_user(login_data: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == login_data.email).first()
-    if not user:
+
+    # Check email exists and password is valid
+    if not user or not verify_password(login_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token = create_access_token(data={"user_id": user.id})
@@ -35,14 +49,16 @@ def login_user(login_data: LoginRequest, db: Session = Depends(get_db)):
         "token_type": "bearer"
     }
 
-# ✅ Dependency to extract and verify current user from JWT
+# ------------------------------
+# ✅ Get current user dependency
 def get_current_user(token: str = Depends(oauth2_scheme)):
     payload = verify_token(token)
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
-    return payload  # returns { "user_id": ... }
+    return payload  # payload = { "user_id": 123 }
 
-# 👤 Authenticated user profile route
+# ------------------------------
+# 👤 Get current user profile route
 @router.get("/users/me")
 def get_profile(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == current_user["user_id"]).first()

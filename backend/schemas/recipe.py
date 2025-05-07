@@ -8,3 +8,9 @@ class RecipeCreate(BaseModel):
     protein: float
     carbs: float
     fat: float
+
+class RecipeRead(RecipeCreate):
+    id: int
+
+    class Config:
+        orm_mode = True

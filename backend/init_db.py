@@ -1,13 +1,14 @@
 # backend/init_db.py
-
+from sqlalchemy import text
 from backend.models.database import Base, engine
-from backend.models import user, recipe, user_recipe, user_meal  # make sure all models are imported
 
-# 🚨 DEV MODE: Drop all tables and recreate them (this wipes data)
-print("Dropping existing tables...")
-Base.metadata.drop_all(bind=engine)
+# Import every model you want to keep (including your new plan_entry)
+from backend.models import user, recipe, user_recipe, plan_entry
 
-print("Creating tables...")
+# 1) Drop the old user_meals table if it still exists
+with engine.begin() as conn:
+    conn.execute(text("DROP TABLE IF EXISTS user_meals CASCADE"))
+
+# 2) Create all remaining tables (users, user_recipes, plan_entries, etc.)
 Base.metadata.create_all(bind=engine)
-
-print("✅ AWS Database tables recreated successfully.")
+print("✅ Database tables created (without user_meals).")

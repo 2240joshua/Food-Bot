@@ -1,21 +1,18 @@
-# backend/routes/recipes.py
-
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, status
 from sqlalchemy.orm import Session
-from backend.models.database import SessionLocal
-from backend.models.user_recipe import UserRecipe
-from backend.schemas.recipe import RecipeCreate
-import requests
-import os
+import requests, os
 from dotenv import load_dotenv
 
+from backend.models.database import SessionLocal
+from backend.models.user import User
+from backend.models.user_recipe import UserRecipe
+from backend.schemas.recipe import RecipeCreate, RecipeRead
+from backend.routes.auth import get_current_user
+
 load_dotenv()
-
 router = APIRouter()
-
 SPOONACULAR_API_KEY = os.getenv("SPOONACULAR_API_KEY")
 
-# Dependency for DB
 def get_db():
     db = SessionLocal()
     try:
@@ -23,8 +20,8 @@ def get_db():
     finally:
         db.close()
 
-# -------------------- SPOONACULAR SEARCH --------------------
-@router.get("/recipes/search")
+
+@router.get("/search", response_model=list[RecipeRead])
 def search_recipes(query: str = Query(..., description="Food name to search")):
     url = "https://api.spoonacular.com/recipes/complexSearch"
     params = {
@@ -33,68 +30,72 @@ def search_recipes(query: str = Query(..., description="Food name to search")):
         "number": 5,
         "addRecipeNutrition": True,
     }
-
-    response = requests.get(url, params=params)
-
-    if response.status_code != 200:
-        raise HTTPException(status_code=500, detail="Failed to fetch recipes.")
-
-    results = response.json().get("results", [])
+    resp = requests.get(url, params=params)
+    if resp.status_code != 200:
+        raise HTTPException(500, "Failed to fetch recipes.")
     meals = []
-
-    for item in results:
-        nutrition = item.get("nutrition", {}).get("nutrients", [])
-        calories = next((n["amount"] for n in nutrition if n["name"] == "Calories"), None)
-        protein = next((n["amount"] for n in nutrition if n["name"] == "Protein"), None)
-        fat = next((n["amount"] for n in nutrition if n["name"] == "Fat"), None)
-        carbs = next((n["amount"] for n in nutrition if n["name"] == "Carbohydrates"), None)
-
+    for item in resp.json().get("results", []):
+        nut = item.get("nutrition", {}).get("nutrients", [])
+        get_n = lambda name: next((n["amount"] for n in nut if n["name"] == name), None)
         meals.append({
-            "title": item.get("title"),
-            "id": item.get("id"),
-            "calories": calories,
-            "protein": protein,
-            "fat": fat,
-            "carbs": carbs
+            "id":           item.get("id"),      # spoonacular ID
+            "title":        item.get("title"),
+            "ingredients":  "",
+            "instructions": "",
+            "calories":     get_n("Calories"),
+            "protein":      get_n("Protein"),
+            "carbs":        get_n("Carbohydrates"),
+            "fat":          get_n("Fat"),
         })
-
     return meals
 
-# -------------------- USER RECIPE CREATE --------------------
-@router.post("/recipes/")
-def create_recipe(recipe: RecipeCreate, user_id: int, db: Session = Depends(get_db)):
-    new_recipe = UserRecipe(
-        user_id=user_id,
-        title=recipe.title,
-        ingredients=recipe.ingredients,
-        instructions=recipe.instructions,
-        calories=recipe.calories,
-        protein=recipe.protein,
-        carbs=recipe.carbs,
-        fat=recipe.fat,
+
+@router.post("/user", response_model=RecipeRead, status_code=status.HTTP_201_CREATED)
+def save_recipe(
+    recipe: RecipeCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = current_user["user_id"]
+    if not db.query(User).get(user_id):
+        raise HTTPException(404, "User not found")
+
+    new = UserRecipe(
+        user_id      = user_id,
+        title        = recipe.title,
+        ingredients  = recipe.ingredients,
+        instructions = recipe.instructions,
+        calories     = recipe.calories,
+        protein      = recipe.protein,
+        carbs        = recipe.carbs,
+        fat          = recipe.fat
     )
-    db.add(new_recipe)
+    db.add(new)
     db.commit()
-    db.refresh(new_recipe)
+    db.refresh(new)
+    return new
 
-    return new_recipe
-def get_my_recipes(user_id: int, db: Session = Depends(get_db)):
-    recipes = db.query(UserRecipe).filter(UserRecipe.user_id == user_id).all()
-    return recipes
-# -------------------- USER RECIPE FETCH --------------------
-@router.get("/recipes/my")
-def get_user_recipes(user_id: int, db: Session = Depends(get_db)):
-    recipes = db.query(UserRecipe).filter(UserRecipe.user_id == user_id).all()
 
-    return recipes
-@router.delete("/recipes/{recipe_id}")
-def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
-    recipe = db.query(UserRecipe).filter(UserRecipe.id == recipe_id).first()
+@router.get("/user", response_model=list[RecipeRead])
+def list_my_recipes(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = current_user["user_id"]
+    return db.query(UserRecipe).filter(UserRecipe.user_id == user_id).all()
 
-    if not recipe:
-        raise HTTPException(status_code=404, detail="Recipe not found")
 
-    db.delete(recipe)
+@router.delete("/user/{recipe_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_my_recipe(
+    recipe_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = current_user["user_id"]
+    deleted = db.query(UserRecipe)\
+                .filter(UserRecipe.id == recipe_id, UserRecipe.user_id == user_id)\
+                .delete()
+    if not deleted:
+        raise HTTPException(404, "Recipe not found")
     db.commit()
-
-    return {"detail": "Recipe deleted"}
+    # 204 No Content

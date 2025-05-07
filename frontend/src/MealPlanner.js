@@ -1,57 +1,103 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import "./App.css";
 
-function MealPlanner({ plannedMeals, selectedDay, setSelectedDay }) {
-  const getTotals = () => {
-    const meals = plannedMeals[selectedDay] || [];
-    return meals.reduce(
-      (totals, meal) => {
-        totals.calories += meal.calories || 0;
-        totals.protein += meal.protein || 0;
-        totals.carbs += meal.carbs || 0;
-        totals.fat += meal.fat || 0;
-        return totals;
-      },
-      { calories: 0, protein: 0, carbs: 0, fat: 0 }
-    );
+const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+
+export default function MealPlanner({
+  plannedMeals,
+  setPlannedMeals,
+  selectedDay,
+  setSelectedDay
+}) {
+  const [recipes, setRecipes] = useState([]);
+
+  // Fetch your saved recipes (so you can add them)
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    fetch("http://localhost:8000/recipes/user", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(setRecipes)
+      .catch(console.error);
+  }, []);
+
+  // Remove one entry both locally & on server
+  const removeFromPlan = (recipeId) => {
+    const token = localStorage.getItem("token");
+    fetch(`http://localhost:8000/planner/${selectedDay}/${recipeId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => {
+        if (!r.ok) throw new Error("Delete failed");
+        return r.json();
+      })
+      .then(data => setPlannedMeals(data.plans))
+      .catch(console.error);
   };
 
-  const totals = getTotals();
-
   return (
-    <div className="container">
-      <h2>📅 Meal Planner</h2>
-
-      <div>
-        <strong>Select Day:</strong><br />
-        {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
+    <div className="planner-container">
+      <div className="planner-days">
+        {DAYS.map(day => (
           <button
             key={day}
+            className={day === selectedDay ? "active" : ""}
             onClick={() => setSelectedDay(day)}
-            style={{ margin: "5px", background: selectedDay === day ? "#007BFF" : "#eee", color: selectedDay === day ? "white" : "black", borderRadius: "5px" }}
           >
             {day}
           </button>
         ))}
       </div>
 
-      <h3>Meals for {selectedDay}</h3>
-      <ul>
-        {(plannedMeals[selectedDay] || []).map((meal, index) => (
-          <li key={index}>
-            <strong>{meal.title}</strong> - {meal.calories} kcal
-            <br />
-            Protein: {meal.protein}g, Carbs: {meal.carbs}g, Fat: {meal.fat}g
-          </li>
-        ))}
-      </ul>
+      <div className="planner-content">
+        {/* Left: your recipes to click and add */}
+        <div className="recipes-list">
+          <h3>My Recipes</h3>
+          {recipes.map(r => (
+            <button
+              key={r.id}
+              className="button-recipe"
+              onClick={() => {
+                // lift-add handled in parent via addMeal
+              }}
+            >
+              {r.title}
+            </button>
+          ))}
+        </div>
 
-      <h3>Totals</h3>
-      <p>Calories: {totals.calories} kcal</p>
-      <p>Protein: {totals.protein}g</p>
-      <p>Carbs: {totals.carbs}g</p>
-      <p>Fat: {totals.fat}g</p>
+        {/* Right: today’s plan with delete buttons */}
+        <div className="day-plan">
+          <h3>{selectedDay}</h3>
+          {!(plannedMeals[selectedDay] || []).length ? (
+            <p>No meals yet—click a recipe to add.</p>
+          ) : (
+            plannedMeals[selectedDay].map(m => (
+              <div 
+                key={m.id} 
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                <button className="button-plan">
+                  {m.title}
+                </button>
+                <button
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    color: '#c00'
+                  }}
+                  onClick={() => removeFromPlan(m.id)}
+                >
+                  🗑️
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   );
 }
-
-export default MealPlanner;
