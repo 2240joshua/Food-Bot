@@ -1,3 +1,5 @@
+// src/MealPlanner.js
+
 import React, { useEffect, useState } from "react";
 import "./App.css";
 
@@ -6,12 +8,14 @@ const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sun
 export default function MealPlanner({
   plannedMeals,
   setPlannedMeals,
+  addMeal,
   selectedDay,
   setSelectedDay
 }) {
-  const [recipes, setRecipes] = useState([]);
+  const [recipes, setRecipes]   = useState([]);
+  const [expanded, setExpanded] = useState({});
 
-  // Fetch your saved recipes (so you can add them)
+  // Fetch saved recipes on mount
   useEffect(() => {
     const token = localStorage.getItem("token");
     fetch("http://localhost:8000/recipes/user", {
@@ -22,20 +26,44 @@ export default function MealPlanner({
       .catch(console.error);
   }, []);
 
-  // Remove one entry both locally & on server
+  // Optimistically remove from UI, then DELETE on server
   const removeFromPlan = (recipeId) => {
+    // 1) Update local state immediately
+    setPlannedMeals(prev => ({
+      ...prev,
+      [selectedDay]: (prev[selectedDay] || []).filter(m => m.id !== recipeId)
+    }));
+
+    // 2) Send DELETE to server
     const token = localStorage.getItem("token");
     fetch(`http://localhost:8000/planner/${selectedDay}/${recipeId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(r => {
-        if (!r.ok) throw new Error("Delete failed");
-        return r.json();
+        if (!r.ok) throw new Error(`Delete failed: ${r.status}`);
       })
-      .then(data => setPlannedMeals(data.plans))
-      .catch(console.error);
+      .catch(err => {
+        console.error("❌ removeFromPlan error:", err);
+        // Optionally, re-fetch the full plan here to resync:
+        // fetchPlanner();
+      });
   };
+
+  // Toggle the “View More” section
+  const toggleExpand = (id) => {
+    setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const dayMeals = plannedMeals[selectedDay] || [];
+
+  // Sum nutrition for the day
+  const totals = dayMeals.reduce((acc, m) => ({
+    calories: acc.calories + m.calories,
+    protein:  acc.protein  + m.protein,
+    carbs:    acc.carbs    + m.carbs,
+    fat:      acc.fat      + m.fat
+  }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
 
   return (
     <div className="planner-container">
@@ -52,47 +80,53 @@ export default function MealPlanner({
       </div>
 
       <div className="planner-content">
-        {/* Left: your recipes to click and add */}
+        {/* Left: Your recipes to add */}
         <div className="recipes-list">
           <h3>My Recipes</h3>
           {recipes.map(r => (
             <button
               key={r.id}
               className="button-recipe"
-              onClick={() => {
-                // lift-add handled in parent via addMeal
-              }}
+              onClick={() => addMeal(r)}
             >
               {r.title}
             </button>
           ))}
         </div>
 
-        {/* Right: today’s plan with delete buttons */}
+        {/* Right: Today’s Plan + nutrition */}
         <div className="day-plan">
           <h3>{selectedDay}</h3>
-          {!(plannedMeals[selectedDay] || []).length ? (
+          <div className="nutrition-summary">
+            <strong>Daily Total:</strong>{" "}
+            {`${totals.calories} kcal, ${totals.protein}g P, ${totals.carbs}g C, ${totals.fat}g F`}
+          </div>
+
+          {dayMeals.length === 0 ? (
             <p>No meals yet—click a recipe to add.</p>
           ) : (
-            plannedMeals[selectedDay].map(m => (
-              <div 
-                key={m.id} 
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-              >
-                <button className="button-plan">
-                  {m.title}
-                </button>
-                <button
-                  style={{
-                    border: 'none',
-                    background: 'transparent',
-                    cursor: 'pointer',
-                    color: '#c00'
-                  }}
-                  onClick={() => removeFromPlan(m.id)}
-                >
-                  🗑️
-                </button>
+            dayMeals.map(m => (
+              <div className="meal-entry" key={m.id}>
+                <div className="meal-header">
+                  <button className="button-plan">{m.title}</button>
+                  <button className="button-view" onClick={() => toggleExpand(m.id)}>
+                    {expanded[m.id] ? "Hide" : "View More"}
+                  </button>
+                  <button className="button-remove" onClick={() => removeFromPlan(m.id)}>
+                    🗑️
+                  </button>
+                </div>
+
+                {expanded[m.id] && (
+                  <div className="meal-details">
+                    <p><strong>Ingredients:</strong> {m.ingredients}</p>
+                    <p><strong>Instructions:</strong> {m.instructions}</p>
+                    <p>
+                      <strong>Nutrition:</strong>{" "}
+                      {`${m.calories} kcal, ${m.protein}g P, ${m.carbs}g C, ${m.fat}g F`}
+                    </p>
+                  </div>
+                )}
               </div>
             ))
           )}

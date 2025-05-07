@@ -1,5 +1,3 @@
-# backend/routes/planner.py
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Dict
@@ -10,7 +8,8 @@ from backend.models.plan_entry import PlanEntry
 from backend.schemas.planner import DayPlan, FullPlan
 from backend.routes.auth import get_current_user
 
-router = APIRouter(prefix="/planner", tags=["planner"])
+# Remove the prefix here—only tag
+router = APIRouter(tags=["planner"])
 
 
 def get_db():
@@ -47,14 +46,11 @@ def save_full_plan(
     current_user: dict = Depends(get_current_user),
 ):
     user_id = current_user["user_id"]
-    # optional: verify user exists
     if not db.query(User).get(user_id):
         raise HTTPException(status_code=404, detail="User not found")
 
-    # delete old entries
     db.query(PlanEntry).filter(PlanEntry.user_id == user_id).delete()
 
-    # insert new entries
     to_create = []
     for day, ids in full.plans.items():
         for idx, rid in enumerate(ids):
@@ -67,7 +63,6 @@ def save_full_plan(
     db.bulk_save_objects(to_create)
     db.commit()
 
-    # return the saved plan
     return get_full_plan(db, current_user)
 
 
@@ -80,7 +75,6 @@ def remove_plan_entry(
 ):
     user_id = current_user["user_id"]
 
-    # delete the matching entry
     deleted = (
         db.query(PlanEntry)
           .filter(
@@ -93,7 +87,6 @@ def remove_plan_entry(
     if not deleted:
         raise HTTPException(status_code=404, detail="Entry not found")
 
-    # re-order remaining entries for that day
     entries = (
         db.query(PlanEntry)
           .filter(PlanEntry.user_id == user_id, PlanEntry.day == day)
@@ -104,6 +97,4 @@ def remove_plan_entry(
         e.order = idx
     db.commit()
 
-    # return the updated full plan
     return get_full_plan(db, current_user)
-        

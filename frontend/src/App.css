@@ -140,3 +140,40 @@
   background: #e6ffe6;
   transform: translateY(-1px);
 }
+.nutrition-summary {
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
+.meal-entry {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.meal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.button-view,
+.button-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #007bff;
+  font-size: 0.9rem;
+}
+
+.button-remove {
+  color: #c00;
+}
+
+.meal-details {
+  padding: 0.5rem 1rem;
+  background: #fafafa;
+  border-top: 1px solid #ddd;
+  margin-top: 0.5rem;
+}
