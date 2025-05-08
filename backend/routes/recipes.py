@@ -1,17 +1,22 @@
+# backend/routes/recipes.py
+
 from fastapi import APIRouter, HTTPException, Depends, Query, status
 from sqlalchemy.orm import Session
 import requests, os
 from dotenv import load_dotenv
 
+from backend.env import BASE_URL, SPOONACULAR_API_KEY
 from backend.models.database import SessionLocal
 from backend.models.user import User
 from backend.models.user_recipe import UserRecipe
-from backend.schemas.recipe import RecipeCreate, RecipeRead
+from backend.schemas.recipe import RecipeCreate, RecipeRead, RecipeUpdate
 from backend.routes.auth import get_current_user
+from fastapi import Path
+from backend.schemas.recipe import RecipeRead
+load_dotenv()  # ensures .env is loaded if you need it here
 
-load_dotenv()
-router = APIRouter()
-SPOONACULAR_API_KEY = os.getenv("SPOONACULAR_API_KEY")
+router = APIRouter(tags=["recipes"])
+
 
 def get_db():
     db = SessionLocal()
@@ -23,22 +28,30 @@ def get_db():
 
 @router.get("/search", response_model=list[RecipeRead])
 def search_recipes(query: str = Query(..., description="Food name to search")):
-    url = "https://api.spoonacular.com/recipes/complexSearch"
-    params = {
-        "apiKey": SPOONACULAR_API_KEY,
-        "query": query,
-        "number": 5,
-        "addRecipeNutrition": True,
-    }
-    resp = requests.get(url, params=params)
+    if not SPOONACULAR_API_KEY:
+        raise HTTPException(status_code=500, detail="Missing SPOONACULAR_API_KEY")
+
+    resp = requests.get(
+        BASE_URL,
+        params={
+            "apiKey": SPOONACULAR_API_KEY,
+            "query": query,
+            "number": 5,
+            "addRecipeNutrition": True,
+        },
+        timeout=5
+    )
     if resp.status_code != 200:
-        raise HTTPException(500, "Failed to fetch recipes.")
+        raise HTTPException(status_code=resp.status_code, detail=resp.text)
+
     meals = []
     for item in resp.json().get("results", []):
         nut = item.get("nutrition", {}).get("nutrients", [])
-        get_n = lambda name: next((n["amount"] for n in nut if n["name"] == name), None)
+        def get_n(name):
+            return next((n["amount"] for n in nut if n["name"] == name), None)
+
         meals.append({
-            "id":           item.get("id"),      # spoonacular ID
+            "id":           item.get("id"),
             "title":        item.get("title"),
             "ingredients":  "",
             "instructions": "",
@@ -58,7 +71,7 @@ def save_recipe(
 ):
     user_id = current_user["user_id"]
     if not db.query(User).get(user_id):
-        raise HTTPException(404, "User not found")
+        raise HTTPException(status_code=404, detail="User not found")
 
     new = UserRecipe(
         user_id      = user_id,
@@ -92,10 +105,59 @@ def delete_my_recipe(
     current_user: dict = Depends(get_current_user),
 ):
     user_id = current_user["user_id"]
-    deleted = db.query(UserRecipe)\
-                .filter(UserRecipe.id == recipe_id, UserRecipe.user_id == user_id)\
-                .delete()
+    deleted = (
+        db.query(UserRecipe)
+          .filter(UserRecipe.id == recipe_id, UserRecipe.user_id == user_id)
+          .delete()
+    )
     if not deleted:
-        raise HTTPException(404, "Recipe not found")
+        raise HTTPException(status_code=404, detail="Recipe not found")
     db.commit()
-    # 204 No Content
+
+
+@router.patch(
+    "/user/{recipe_id}",
+    response_model=RecipeRead,
+    status_code=status.HTTP_200_OK
+)
+def update_my_recipe(
+    recipe_id: int,
+    recipe_in: RecipeUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = current_user["user_id"]
+    db_recipe = (
+        db.query(UserRecipe)
+          .filter(UserRecipe.id == recipe_id, UserRecipe.user_id == user_id)
+          .first()
+    )
+    if not db_recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    update_data = recipe_in.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_recipe, field, value)
+
+    db.commit()
+    db.refresh(db_recipe)
+    return db_recipe
+@router.get(
+    "/user/{recipe_id}",
+    response_model=RecipeRead,
+    status_code=status.HTTP_200_OK
+)
+def get_my_recipe(
+    recipe_id: int = Path(..., description="Your recipe ID"),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    user_id = current_user["user_id"]
+    rec = (
+        db.query(UserRecipe)
+          .filter(UserRecipe.id == recipe_id, UserRecipe.user_id == user_id)
+          .first()
+    )
+    if not rec:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    return rec

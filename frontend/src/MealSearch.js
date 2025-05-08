@@ -5,46 +5,63 @@ function MealSearch({ onAddMeal }) {
   const [meals, setMeals] = useState([]);
   const [error, setError] = useState("");
 
+  // Search endpoint
   const handleSearch = async () => {
+    setError("");
     try {
-      const res = await fetch(`http://localhost:8000/recipes/search?query=${query}`);
+      const res = await fetch(
+        `http://localhost:8000/recipes/search?query=${encodeURIComponent(query)}`
+      );
       const data = await res.json();
-
-      if (res.ok) {
-        setMeals(data);
-        setError("");
+      if (!res.ok) {
+        console.error("Search error:", data);
+        setError(data.detail || `Error ${res.status}`);
       } else {
-        setError(data.detail || "Something went wrong");
+        setMeals(data);
       }
     } catch (err) {
+      console.error("Fetch failed:", err);
       setError("❌ Could not fetch recipes");
     }
   };
 
+  // Save a recipe to your own list
   const saveToMyRecipes = async (meal) => {
+    setError("");
     const token = localStorage.getItem("token");
+    if (!token) {
+      setError("❌ You must be logged in to save recipes");
+      return;
+    }
 
-    const res = await fetch(`http://localhost:8000/recipes/save?user_id=1`, { // Replace 1 with dynamic user ID if you have it
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        title: meal.title,
-        ingredients: "Imported from Spoonacular",
-        instructions: "Imported from Spoonacular",
-        calories: meal.calories || 0,
-        protein: meal.protein || 0,
-        carbs: meal.carbs || 0,
-        fat: meal.fat || 0,
-      }),
-    });
+    try {
+      const res = await fetch("http://localhost:8000/recipes/user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title:        meal.title,
+          ingredients:  meal.ingredients || "",
+          instructions: meal.instructions || "",
+          calories:     meal.calories || 0,
+          protein:      meal.protein || 0,
+          carbs:        meal.carbs || 0,
+          fat:          meal.fat || 0,
+        }),
+      });
 
-    if (res.ok) {
-      alert("✅ Saved to My Recipes!");
-    } else {
-      alert("❌ Failed to save recipe");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        console.error("Save error:", errData);
+        setError(errData.detail || `Save failed: ${res.status}`);
+      } else {
+        alert("✅ Recipe saved to My Recipes!");
+      }
+    } catch (err) {
+      console.error("Save fetch failed:", err);
+      setError("❌ Could not save recipe");
     }
   };
 
@@ -57,19 +74,33 @@ function MealSearch({ onAddMeal }) {
         onChange={(e) => setQuery(e.target.value)}
         className="input-field"
       />
-      <button onClick={handleSearch} className="button">Search</button>
+      <button onClick={handleSearch} className="button">
+        Search
+      </button>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       {meals.length > 0 && (
-        <ul>
-          {meals.map((meal, index) => (
-            <li key={index} style={{ marginBottom: "1rem" }}>
-              <strong>{meal.title}</strong><br />
-              Calories: {meal.calories} kcal<br />
-              Protein: {meal.protein}g, Carbs: {meal.carbs}g, Fat: {meal.fat}g<br />
-              <button onClick={() => onAddMeal(meal)} className="button-small">➕ Add to Planner</button>
-              <button onClick={() => saveToMyRecipes(meal)} className="button-small" style={{ marginLeft: "10px" }}>
+        <ul style={{ listStyle: "none", padding: 0 }}>
+          {meals.map((meal) => (
+            <li key={meal.id} style={{ marginBottom: "1rem" }}>
+              <strong>{meal.title}</strong>
+              <br />
+              Calories: {meal.calories} kcal
+              <br />
+              Protein: {meal.protein}g, Carbs: {meal.carbs}g, Fat: {meal.fat}g
+              <br />
+              <button
+                onClick={() => onAddMeal(meal)}
+                className="button-small"
+              >
+                ➕ Add to Planner
+              </button>
+              <button
+                onClick={() => saveToMyRecipes(meal)}
+                className="button-small"
+                style={{ marginLeft: 10 }}
+              >
                 💾 Save to My Recipes
               </button>
             </li>
