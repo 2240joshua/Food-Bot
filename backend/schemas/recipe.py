@@ -1,19 +1,30 @@
+# backend/schemas/recipe.py
+
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
+
 class RecipeCreate(BaseModel):
     title: str
-    ingredients: str
-    instructions: str
+    ingredients: str       # still a comma-separated string on input
+    instructions: str      # still a single string on input
     calories: float
     protein: float
     carbs: float
     fat: float
 
-class RecipeRead(RecipeCreate):
+class RecipeRead(BaseModel):
     id: int
+    title: str
+    ingredients: List[str]    # now a list of strings
+    instructions: str         # remains a single string
+    calories: float
+    protein: float
+    carbs: float
+    fat: float
 
     class Config:
         orm_mode = True
+
 class RecipeUpdate(BaseModel):
     title: Optional[str]
     ingredients: Optional[str]
