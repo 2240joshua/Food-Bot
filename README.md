@@ -1,3 +1,5 @@
+IN PROGRESS
+
 # Food Bot
 Run program by:
 python -m backend.init_db
