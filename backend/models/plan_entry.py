@@ -7,7 +7,7 @@ class PlanEntry(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    day     = Column(String, nullable=False)   # e.g. "Monday"
+    day     = Column(String, nullable=False)   
     recipe_id = Column(Integer, ForeignKey("user_recipes.id"), nullable=False)
     order     = Column(Integer, nullable=False)  # position in the list
 

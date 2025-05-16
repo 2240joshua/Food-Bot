@@ -5,8 +5,8 @@ from typing import List, Optional
 
 class RecipeCreate(BaseModel):
     title: str
-    ingredients: str       # still a comma-separated string on input
-    instructions: str      # still a single string on input
+    ingredients: str       
+    instructions: str      
     calories: float
     protein: float
     carbs: float
@@ -15,8 +15,8 @@ class RecipeCreate(BaseModel):
 class RecipeRead(BaseModel):
     id: int
     title: str
-    ingredients: List[str]    # now a list of strings
-    instructions: str         # remains a single string
+    ingredients: List[str]    
+    instructions: str         
     calories: float
     protein: float
     carbs: float

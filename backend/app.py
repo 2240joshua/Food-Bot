@@ -6,23 +6,21 @@ from backend.routes.user    import router as user_router
 from backend.routes.recipes import router as recipes_router
 from backend.routes.planner import router as planner_router
 from backend.routes.recommend import router as recommend_router
-# (we no longer need spoonacular_router)
+
 
 app = FastAPI()
 
-# 🔐 Auth (login, /users/me)
+
 app.include_router(auth_router,     prefix="",         tags=["auth"])
 
-# 👥 User management (registration, get by id)
+
 app.include_router(user_router,     prefix="/users",   tags=["users"])
 
-# 🍽️ Recipes CRUD & search (including Spoonacular search)
+
 app.include_router(recipes_router,  prefix="/recipes", tags=["recipes"])
 
-# 🗓️ Planner endpoints
 app.include_router(planner_router,  prefix="/planner", tags=["planner"])
 
-# 💡 Recommendations (your custom recommend service)
 app.include_router(recommend_router,prefix="/recommend", tags=["recommend"])
 
 @app.get("/", tags=["root"])
