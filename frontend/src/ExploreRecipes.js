@@ -5,7 +5,7 @@ function ExploreRecipes() {
 
   useEffect(() => {
     const fetchPublicRecipes = async () => {
-      const res = await fetch(`http://localhost:8000/recipes/public`);
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/recipes/public`);
       const data = await res.json();
       setRecipes(data);
     };

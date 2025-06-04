@@ -10,7 +10,7 @@ function MealSearch({ onAddMeal }) {
     setError("");
     try {
       const res = await fetch(
-        `http://localhost:8000/recipes/search?query=${encodeURIComponent(query)}`
+        `${process.env.REACT_APP_API_URL}/recipes/search?query=${encodeURIComponent(query)}`
       );
       const data = await res.json();
       if (!res.ok) {
