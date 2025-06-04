@@ -19,13 +19,13 @@ function DashboardTabs({ user, onLogout }) {
 
     async function loadPlanner() {
       try {
-        const plannerRes = await fetch("http://localhost:8000/planner/", {
+        const plannerRes = await fetch(`${process.env.REACT_APP_API_URL}/planner/`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!plannerRes.ok) throw new Error(`Planner load failed: ${plannerRes.status}`);
         const { plans: idMap } = await plannerRes.json();
 
-        const recipesRes = await fetch("http://localhost:8000/recipes/user", {
+        const recipesRes = await fetch(`${process.env.REACT_APP_API_URL}/recipes/user`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!recipesRes.ok) throw new Error(`Recipes load failed: ${recipesRes.status}`);
@@ -63,7 +63,7 @@ function DashboardTabs({ user, onLogout }) {
     );
 
     const token = localStorage.getItem("token");
-    fetch("http://localhost:8000/planner/", {
+    fetch(`${process.env.REACT_APP_API_URL}/planner/`, {
       method: "POST",
       headers: {
         "Content-Type":  "application/json",

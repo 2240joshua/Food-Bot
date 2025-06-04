@@ -14,7 +14,7 @@ function MyRecipes() {
       setError("❌ Not logged in");
       return;
     }
-    fetch("http://localhost:8000/recipes/user", {
+    fetch(`${process.env.REACT_APP_API_URL}/recipes/user`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(async (res) => {

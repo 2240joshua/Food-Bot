@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 // You need a backend endpoint for this (see note below)
-const API_URL = "http://localhost:8000/ingredients/suggest";
+const API_URL = `${process.env.REACT_APP_API_URL}/ingredients/suggest`;
 
 
 function FoodSearch({ value, onChange, onSelect }) {

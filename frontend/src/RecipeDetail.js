@@ -17,7 +17,7 @@ export default function RecipeDetail() {
       return;
     }
 
-    fetch(`http://localhost:8000/recipes/user/${id}`, {
+    fetch(`${process.env.REACT_APP_API_URL}/recipes/user/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {

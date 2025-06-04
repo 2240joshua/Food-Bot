@@ -8,7 +8,7 @@ function Login({ setUser }) {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const res = await fetch("http://localhost:8000/login", {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -18,7 +18,7 @@ function Login({ setUser }) {
 
     if (res.ok) {
       localStorage.setItem("token", data.access_token);
-      const profileRes = await fetch("http://localhost:8000/users/me", {
+      const profileRes = await fetch(`${process.env.REACT_APP_API_URL}/users/me`, {
         headers: { Authorization: `Bearer ${data.access_token}` },
       });
       const profile = await profileRes.json();
@@ -33,7 +33,7 @@ function Login({ setUser }) {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    const res = await fetch("http://localhost:8000/users/", {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/users/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, name: email, password }),

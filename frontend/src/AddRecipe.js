@@ -59,7 +59,7 @@ export default function AddRecipe() {
     };
 
     try {
-      const res = await fetch("http://localhost:8000/recipes/user", {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/recipes/user`,{
         method: "POST",
         headers: {
           "Content-Type": "application/json",

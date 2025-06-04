@@ -21,7 +21,7 @@ export default function MealPlanner({
   // Helper to POST only IDs
   async function savePlanner(idMap) {
     const token = localStorage.getItem("token");
-    const res = await fetch("http://localhost:8000/planner/", {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/planner/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -71,7 +71,7 @@ export default function MealPlanner({
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch("http://localhost:8000/planner/", {
+    fetch(`${process.env.REACT_APP_API_URL}/planner/`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(r => (r.ok ? r.json() : Promise.reject()))
@@ -87,7 +87,7 @@ export default function MealPlanner({
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch("http://localhost:8000/recipes/user", {
+    fetch(`${process.env.REACT_APP_API_URL}/recipes/user`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(r => (r.ok ? r.json() : Promise.reject()))
