@@ -8,6 +8,7 @@ RUN npm install
 
 # Copy the rest of the frontend app
 COPY frontend/. ./
+RUN echo "BUILD TIME REACT_APP_API_URL: $REACT_APP_API_URL"
 
 RUN npm run build
 
