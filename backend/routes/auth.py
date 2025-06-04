@@ -27,16 +27,19 @@ def get_db():
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
+# ------------------------------
+# 📌 Login Model (NEEDS email + password)
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
-
+# ------------------------------
+# ✅ Login route
 @router.post("/login")
 def login_user(login_data: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == login_data.email).first()
 
-
+    # Check email exists and password is valid
     if not user or not verify_password(login_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
@@ -46,12 +49,16 @@ def login_user(login_data: LoginRequest, db: Session = Depends(get_db)):
         "token_type": "bearer"
     }
 
+# ------------------------------
+# ✅ Get current user dependency
 def get_current_user(token: str = Depends(oauth2_scheme)):
     payload = verify_token(token)
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
     return payload  # payload = { "user_id": 123 }
 
+# ------------------------------
+# 👤 Get current user profile route
 @router.get("/users/me")
 def get_profile(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == current_user["user_id"]).first()

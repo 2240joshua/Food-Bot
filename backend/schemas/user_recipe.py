@@ -1,19 +1,40 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
-from sqlalchemy.orm import relationship
-from backend.models.database import Base
+from pydantic import BaseModel
+from typing import List, Optional
 
-class UserRecipe(Base):
-    __tablename__ = "user_recipes"
+class IngredientIn(BaseModel):
+    name: str
+    amount: float
+    unit: str
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    title = Column(String, nullable=False)
-    ingredients = Column(String, nullable=False)
-    instructions = Column(String, nullable=False)  # <-- ✅ ADD THIS LINE
+class RecipeCreate(BaseModel):
+    title: str
+    instructions: str
+    ingredients: List[IngredientIn]
+    servings: int = 1   # <-- NEW
 
-    calories = Column(Float, nullable=False)
-    protein = Column(Float, nullable=False)
-    carbs = Column(Float, nullable=False)
-    fat = Column(Float, nullable=False)
+class RecipeRead(BaseModel):
+    id: int
+    title: str
+    instructions: str
+    ingredients: List[IngredientIn]
+    calories: Optional[float]
+    protein: Optional[float]
+    carbs: Optional[float]
+    fat: Optional[float]
+    servings: int       # <-- NEW
 
-    user = relationship("User", back_populates="recipes")
+    class Config:
+        from_attributes = True
+
+class RecipeUpdate(BaseModel):
+    title: Optional[str]
+    ingredients: Optional[List[IngredientIn]]
+    instructions: Optional[str]
+    calories: Optional[float]
+    protein: Optional[float]
+    carbs: Optional[float]
+    fat: Optional[float]
+    servings: Optional[int] 
+
+    class Config:
+        from_attributes = True

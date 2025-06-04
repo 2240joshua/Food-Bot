@@ -1,7 +1,7 @@
 import sys
 import os
 
-
+# ✅ Add parent directory to Python path first
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import requests
@@ -17,7 +17,7 @@ def fetch_recipes(query="", ingredients="", cuisine="", diet="", max_ready_time=
         "number": number,
         "instructionsRequired": True,
         "addRecipeInformation": True,
-        "addRecipeNutrition": True,  
+        "addRecipeNutrition": True,  # ✅ This ensures calories, protein, fat, carbs are included
         "apiKey": SPOONACULAR_API_KEY,
     }
 
@@ -26,7 +26,7 @@ def fetch_recipes(query="", ingredients="", cuisine="", diet="", max_ready_time=
     if response.status_code == 200:
         recipes = response.json().get("results", [])
 
-
+        # ✅ Prepare simplified recipe list with nutrition extracted
         result = []
         for recipe in recipes:
             nutrition = {n['title'].lower(): n['amount'] for n in recipe.get("nutrition", {}).get("nutrients", [])}
@@ -42,3 +42,46 @@ def fetch_recipes(query="", ingredients="", cuisine="", diet="", max_ready_time=
     else:
         print(f"Error: {response.status_code}, {response.text}")
         return []
+def search_ingredient_id(name):
+    url = "https://api.spoonacular.com/food/ingredients/search"
+    params = {
+        "query": name,
+        "number": 1,
+        "apiKey": SPOONACULAR_API_KEY,
+    }
+    resp = requests.get(url, params=params)
+    if resp.status_code == 200:
+        results = resp.json().get("results", [])
+        if results:
+            return results[0]["id"]
+    return None
+
+def get_ingredient_nutrition(ingredient_id, amount, unit):
+    url = f"https://api.spoonacular.com/food/ingredients/{ingredient_id}/information"
+    params = {
+        "amount": amount,
+        "unit": unit,
+        "apiKey": SPOONACULAR_API_KEY,
+    }
+    resp = requests.get(url, params=params)
+    if resp.status_code == 200:
+        nutrients = resp.json().get("nutrition", {}).get("nutrients", [])
+        def grab(nutrient):
+            for n in nutrients:
+                if n["name"].lower() == nutrient.lower():
+                    return n["amount"]
+            return 0.0
+        return {
+            "calories": grab("Calories"),
+            "protein": grab("Protein"),
+            "carbs": grab("Carbohydrates"),
+            "fat": grab("Fat"),
+        }
+    return {"calories": 0, "protein": 0, "carbs": 0, "fat": 0}
+
+def get_nutrients_for_ingredient(ingredient):
+    # ingredient is a dict with keys: name, amount, unit
+    ingredient_id = search_ingredient_id(ingredient["name"])
+    if not ingredient_id:
+        return {"calories": 0, "protein": 0, "carbs": 0, "fat": 0}
+    return get_ingredient_nutrition(ingredient_id, ingredient["amount"], ingredient["unit"])

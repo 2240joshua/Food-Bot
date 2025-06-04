@@ -15,5 +15,5 @@ class UserRecipe(Base):
     carbs        = Column(Float, nullable=False)
     fat          = Column(Float, nullable=False)
     is_public    = Column(Boolean, default=False)
-
+    servings = Column(Integer, default=1)
     user = relationship("User", back_populates="recipes")
