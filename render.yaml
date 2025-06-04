@@ -1,4 +1,26 @@
 services:
-  - type: docker
-    name: foodbot-app
+  - type: web
+    name: foodbot-backend
     env: docker
+    plan: free
+    dockerfilePath: backend/Dockerfile
+    buildCommand: ""
+    startCommand: ""
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: foodbot-db    # you'll create this db on Render
+          property: connectionString
+      - key: SECRET_KEY
+        sync: false          # set in Render dashboard
+      - key: SPOONACULAR_API_KEY
+        sync: false          # set in Render dashboard
+
+  - type: web
+    name: foodbot-frontend
+    env: docker
+    plan: free
+    dockerfilePath: frontend/Dockerfile
+    buildCommand: ""
+    startCommand: ""
+    envVars: []
