@@ -9,12 +9,12 @@ services:
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: foodbot-db    # you'll create this db on Render
+          name: foodbot-db    
           property: connectionString
       - key: SECRET_KEY
-        sync: false          # set in Render dashboard
+        sync: false          
       - key: SPOONACULAR_API_KEY
-        sync: false          # set in Render dashboard
+        sync: false         
 
   - type: web
     name: foodbot-frontend
