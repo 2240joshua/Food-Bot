@@ -15,7 +15,7 @@ function UserProfile({ user: initialUser }) {
 
     (async () => {
       try {
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/users/me`, {
+        const res = await fetch("https://foodbot-backend.onrender.com/users/me", {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();

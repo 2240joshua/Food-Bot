@@ -5,11 +5,11 @@ function Login({ setUser }) {
   const [password, setPassword] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
   const [message, setMessage] = useState("");
-console.log('API_URL:', process.env.REACT_APP_API_URL);
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/login`, {
+    const res = await fetch("https://foodbot-backend.onrender.com/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -19,7 +19,7 @@ console.log('API_URL:', process.env.REACT_APP_API_URL);
 
     if (res.ok) {
       localStorage.setItem("token", data.access_token);
-      const profileRes = await fetch(`${process.env.REACT_APP_API_URL}/users/me`, {
+      const profileRes = await fetch("https://foodbot-backend.onrender.com/users/me", {
         headers: { Authorization: `Bearer ${data.access_token}` },
       });
       const profile = await profileRes.json();
@@ -34,7 +34,7 @@ console.log('API_URL:', process.env.REACT_APP_API_URL);
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/users/`, {
+    const res = await fetch("https://foodbot-backend.onrender.com/users/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, name: email, password }),

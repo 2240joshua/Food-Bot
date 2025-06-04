@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 // You need a backend endpoint for this (see note below)
-const API_URL = `${process.env.REACT_APP_API_URL}/ingredients/suggest`;
+const API_URL = "https://foodbot-backend.onrender.com/ingredients/suggest";
 
 
 function FoodSearch({ value, onChange, onSelect }) {

@@ -14,7 +14,7 @@ function MyRecipes() {
       setError("❌ Not logged in");
       return;
     }
-    fetch(`${process.env.REACT_APP_API_URL}/recipes/user`, {
+    fetch("https://foodbot-backend.onrender.com/recipes/user", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(async (res) => {
@@ -29,7 +29,7 @@ function MyRecipes() {
   }, [token]);
 
   const handleDelete = (id) => {
-    fetch(`${process.env.REACT_APP_API_URL}/recipes/user/${id}`, {
+    fetch(`https://foodbot-backend.onrender.com/recipes/user/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -95,7 +95,7 @@ function MyRecipes() {
     // Log for debugging:
     console.log("PATCH bodyToSend", bodyToSend);
 
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/recipes/user/${id}`, {
+    const res = await fetch(`https://foodbot-backend.onrender.com/recipes/user/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

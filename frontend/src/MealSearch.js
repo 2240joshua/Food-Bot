@@ -10,7 +10,7 @@ function MealSearch({ onAddMeal }) {
     setError("");
     try {
       const res = await fetch(
-        `${process.env.REACT_APP_API_URL}/recipes/search?query=${encodeURIComponent(query)}`
+        `https://foodbot-backend.onrender.com/recipes/search?query=${encodeURIComponent(query)}`
       );
       const data = await res.json();
       if (!res.ok) {
@@ -35,7 +35,7 @@ function MealSearch({ onAddMeal }) {
     }
 
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/recipes/user`, {
+      const res = await fetch("https://foodbot-backend.onrender.com/recipes/user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

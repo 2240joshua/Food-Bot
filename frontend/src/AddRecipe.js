@@ -59,7 +59,7 @@ export default function AddRecipe() {
     };
 
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/recipes/user`,{
+      const res = await fetch("https://foodbot-backend.onrender.com/recipes/user",{
         method: "POST",
         headers: {
           "Content-Type": "application/json",

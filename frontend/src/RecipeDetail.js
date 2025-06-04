@@ -17,7 +17,7 @@ export default function RecipeDetail() {
       return;
     }
 
-    fetch(`${process.env.REACT_APP_API_URL}/recipes/user/${id}`, {
+    fetch(`https://foodbot-backend.onrender.com/recipes/user/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {

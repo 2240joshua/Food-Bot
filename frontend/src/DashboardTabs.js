@@ -19,13 +19,13 @@ function DashboardTabs({ user, onLogout }) {
 
     async function loadPlanner() {
       try {
-        const plannerRes = await fetch(`${process.env.REACT_APP_API_URL}/planner/`, {
+        const plannerRes = await fetch("https://foodbot-backend.onrender.com/planner/", {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!plannerRes.ok) throw new Error(`Planner load failed: ${plannerRes.status}`);
         const { plans: idMap } = await plannerRes.json();
 
-        const recipesRes = await fetch(`${process.env.REACT_APP_API_URL}/recipes/user`, {
+        const recipesRes = await fetch("https://foodbot-backend.onrender.com/recipes/user", {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!recipesRes.ok) throw new Error(`Recipes load failed: ${recipesRes.status}`);
@@ -63,7 +63,7 @@ function DashboardTabs({ user, onLogout }) {
     );
 
     const token = localStorage.getItem("token");
-    fetch(`${process.env.REACT_APP_API_URL}/planner/`, {
+    fetch("https://foodbot-backend.onrender.com/planner/", {
       method: "POST",
       headers: {
         "Content-Type":  "application/json",

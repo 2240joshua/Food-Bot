@@ -21,7 +21,7 @@ export default function MealPlanner({
   // Helper to POST only IDs
   async function savePlanner(idMap) {
     const token = localStorage.getItem("token");
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/planner/`, {
+    const res = await fetch("https://foodbot-backend.onrender.com/planner", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -71,7 +71,7 @@ export default function MealPlanner({
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch(`${process.env.REACT_APP_API_URL}/planner/`, {
+    fetch("https://foodbot-backend.onrender.com/planner/", {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(r => (r.ok ? r.json() : Promise.reject()))
@@ -87,7 +87,7 @@ export default function MealPlanner({
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch(`${process.env.REACT_APP_API_URL}/recipes/user`, {
+    fetch("https://foodbot-backend.onrender.com/recipes/user", {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(r => (r.ok ? r.json() : Promise.reject()))
