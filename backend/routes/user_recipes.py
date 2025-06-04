@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.models.database import SessionLocal
-from backend.models.user import User
-from backend.models.user_recipe import UserRecipe
-from backend.schemas.user_recipe import UserRecipeCreate, UserRecipeOut
+from models.database import SessionLocal
+from models.user import User
+from models.user_recipe import UserRecipe
+from schemas.user_recipe import UserRecipeCreate, UserRecipeOut
 from typing import List
 from fastapi import status
 

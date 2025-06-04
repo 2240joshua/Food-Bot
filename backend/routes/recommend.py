@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Query
-from backend.services.spoonacular import fetch_recipes
+from services.spoonacular import fetch_recipes
 
 router = APIRouter()
 

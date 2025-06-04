@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, JSON, Text, Boolean
 from sqlalchemy.orm import relationship
-from backend.models.database import Base
+from models.database import Base
 
 class UserRecipe(Base):
     __tablename__ = "user_recipes"
@@ -8,7 +8,7 @@ class UserRecipe(Base):
     id           = Column(Integer, primary_key=True, index=True)
     user_id      = Column(Integer, ForeignKey("users.id"), nullable=False)
     title        = Column(String, nullable=False)
-    ingredients  = Column(JSON, nullable=False)   # JSON list of {name,amount,unit}
+    ingredients  = Column(JSON, nullable=False)  
     instructions = Column(Text, nullable=False)
     calories     = Column(Float, nullable=False)
     protein      = Column(Float, nullable=False)

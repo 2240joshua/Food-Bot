@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from backend.models.database import Base
+from models.database import Base
 
 
 class FavoriteRecipe(Base):

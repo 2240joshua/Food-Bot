@@ -10,7 +10,7 @@ class RecipeCreate(BaseModel):
     title: str
     instructions: str
     ingredients: List[IngredientIn]
-    servings: int = 1   # <-- NEW
+    servings: int = 1   
 
 class RecipeRead(BaseModel):
     id: int
@@ -21,7 +21,7 @@ class RecipeRead(BaseModel):
     protein: Optional[float]
     carbs: Optional[float]
     fat: Optional[float]
-    servings: int       # <-- NEW
+    servings: int      
 
     class Config:
         from_attributes = True

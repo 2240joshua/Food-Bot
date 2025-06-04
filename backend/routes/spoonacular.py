@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 import requests
-from backend.env import SPOONACULAR_API_KEY
+from env import SPOONACULAR_API_KEY
 
 router = APIRouter()
 

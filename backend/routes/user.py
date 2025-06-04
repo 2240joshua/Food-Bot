@@ -2,9 +2,9 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.models.database import SessionLocal
-from backend.models.user import User
-from backend.schemas.user import UserCreate
+from models.database import SessionLocal
+from models.user import User
+from schemas.user import UserCreate
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

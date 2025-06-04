@@ -3,14 +3,13 @@ from sqlalchemy.orm import Session
 from typing import List
 import json
 
-from backend.models.database import SessionLocal
-from backend.models.user import User
-from backend.models.user_recipe import UserRecipe
-from backend.schemas.recipe import IngredientIn, RecipeCreate, RecipeRead, RecipeUpdate
-from backend.routes.auth import get_current_user
+from models.database import SessionLocal
+from models.user import User
+from models.user_recipe import UserRecipe
+from schemas.recipe import IngredientIn, RecipeCreate, RecipeRead, RecipeUpdate
+from routes.auth import get_current_user
 
-# ⬇️ Import Spoonacular helpers
-from backend.services.spoonacular import get_nutrients_for_ingredient
+from services.spoonacular import get_nutrients_for_ingredient
 
 router = APIRouter(tags=["recipes"])
 
@@ -48,7 +47,7 @@ def parse_ingredients(raw):
                 "unit": parsed.get("unit", ""),
             }]
         elif isinstance(parsed, str):
-            # Try double-decoding (for accidental double-encoding)
+
             try:
                 subparsed = json.loads(parsed)
                 if isinstance(subparsed, list):
@@ -66,7 +65,7 @@ def parse_ingredients(raw):
         else:
             return []
     except Exception:
-        # Fallback: treat as comma-separated plain text (e.g. "egg,bread")
+
         parts = [p.strip() for p in raw.split(",") if p.strip()]
         return [{"name": name, "amount": 0.0, "unit": ""} for name in parts]
 
@@ -75,13 +74,13 @@ def ensure_ingredient_list(ingredients):
     Ensure the incoming ingredients is a list of dicts.
     This is defensive for both POST and PATCH.
     """
-    # If it's a string (from bad frontend or buggy PATCH), parse as JSON
+
     if isinstance(ingredients, str):
         try:
             ingredients = json.loads(ingredients)
         except Exception:
             ingredients = []
-    # If it's a list of dicts, or list of IngredientIn, convert to dicts
+    
     result = []
     for ing in ingredients or []:
         if hasattr(ing, 'dict'):
@@ -114,7 +113,7 @@ def save_recipe(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Could not serialize ingredients: {e}")
 
-    # ⬇️ Spoonacular: sum up nutrition per ingredient
+
     totals = {"calories": 0, "protein": 0, "carbs": 0, "fat": 0}
     for ing in safe_ingredients:
         n = get_nutrients_for_ingredient(ing)
@@ -233,7 +232,6 @@ def update_my_recipe(
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Could not serialize updated ingredients: {e}")
 
-        # ⬇️ Recalculate nutrition for PATCH as well!
         totals = {"calories": 0, "protein": 0, "carbs": 0, "fat": 0}
         for ing in safe_ingredients:
             n = get_nutrients_for_ingredient(ing)

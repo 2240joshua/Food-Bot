@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Dict
 
-from backend.models.database import SessionLocal
-from backend.models.user import User
-from backend.models.plan_entry import PlanEntry
-from backend.schemas.planner import DayPlan, FullPlan
-from backend.routes.auth import get_current_user
+from models.database import SessionLocal
+from models.user import User
+from models.plan_entry import PlanEntry
+from schemas.planner import DayPlan, FullPlan
+from routes.auth import get_current_user
 
 # Remove the prefix here—only tag
 router = APIRouter(tags=["planner"])

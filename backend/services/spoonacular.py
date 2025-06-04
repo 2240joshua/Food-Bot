@@ -1,7 +1,7 @@
 import sys
 import os
 
-# ✅ Add parent directory to Python path first
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import requests
@@ -17,7 +17,7 @@ def fetch_recipes(query="", ingredients="", cuisine="", diet="", max_ready_time=
         "number": number,
         "instructionsRequired": True,
         "addRecipeInformation": True,
-        "addRecipeNutrition": True,  # ✅ This ensures calories, protein, fat, carbs are included
+        "addRecipeNutrition": True,  
         "apiKey": SPOONACULAR_API_KEY,
     }
 
@@ -26,7 +26,7 @@ def fetch_recipes(query="", ingredients="", cuisine="", diet="", max_ready_time=
     if response.status_code == 200:
         recipes = response.json().get("results", [])
 
-        # ✅ Prepare simplified recipe list with nutrition extracted
+       
         result = []
         for recipe in recipes:
             nutrition = {n['title'].lower(): n['amount'] for n in recipe.get("nutrition", {}).get("nutrients", [])}
@@ -80,7 +80,7 @@ def get_ingredient_nutrition(ingredient_id, amount, unit):
     return {"calories": 0, "protein": 0, "carbs": 0, "fat": 0}
 
 def get_nutrients_for_ingredient(ingredient):
-    # ingredient is a dict with keys: name, amount, unit
+
     ingredient_id = search_ingredient_id(ingredient["name"])
     if not ingredient_id:
         return {"calories": 0, "protein": 0, "carbs": 0, "fat": 0}
