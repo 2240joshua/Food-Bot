@@ -34,7 +34,7 @@ function Login({ setUser }) {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    const res = await fetch("https://foodbot-backend.onrender.com/users/", {
+    const res = await fetch(`https://foodbot-backend.onrender.com/users/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, name: email, password }),
