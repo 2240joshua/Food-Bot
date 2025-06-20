@@ -1,3 +1,4 @@
+#backend/models/user_recipe.py
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, JSON, Text, Boolean
 from sqlalchemy.orm import relationship
 from models.database import Base

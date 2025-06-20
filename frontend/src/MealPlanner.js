@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from "react";
 import "./App.css";
-
+const API_BASE = process.env.REACT_APP_API_BASE;
 const DAYS = [
   "Monday","Tuesday","Wednesday","Thursday",
   "Friday","Saturday","Sunday"
@@ -21,7 +21,7 @@ export default function MealPlanner({
   // Helper to POST only IDs
   async function savePlanner(idMap) {
     const token = localStorage.getItem("token");
-    const res = await fetch("https://foodbot-backend.onrender.com/planner", {
+    const res = await fetch(`${API_BASE}/planner`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -71,7 +71,7 @@ export default function MealPlanner({
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch("https://foodbot-backend.onrender.com/planner/", {
+    fetch(`${API_BASE}/planner/`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(r => (r.ok ? r.json() : Promise.reject()))
@@ -87,7 +87,7 @@ export default function MealPlanner({
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch("https://foodbot-backend.onrender.com/recipes/user", {
+    fetch(`${API_BASE}/recipes/user`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(r => (r.ok ? r.json() : Promise.reject()))

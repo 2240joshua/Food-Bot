@@ -1,65 +1,59 @@
 import React, { useState } from "react";
 import FoodSearch from "./FoodSearch";
+import "./AddRecipe.css";
 
-// --- Add this function at the top ---
-function parseFraction(input) {
-  input = input.trim();
-  // Handles mixed numbers, e.g. 1 1/2
-  const mixed = input.match(/^(\d+)\s+(\d+)\/(\d+)$/);
-  if (mixed) return parseInt(mixed[1]) + parseInt(mixed[2]) / parseInt(mixed[3]);
-  // Handles fractions, e.g. 2/3
-  const frac = input.match(/^(\d+)\/(\d+)$/);
-  if (frac) return parseInt(frac[1]) / parseInt(frac[2]);
-  // Handles decimals and integers
-  const asFloat = parseFloat(input);
-  if (!isNaN(asFloat)) return asFloat;
-  return 0; // fallback for invalid input
-}
+const API_BASE = process.env.REACT_APP_API_BASE;
 
 export default function AddRecipe() {
   const [title, setTitle] = useState("");
-  const [servings, setServings] = useState(1);
-  const [instructions, setInstructions] = useState("");
-  const [ingredients, setIngredients] = useState([
-    { name: "", amount: "", unit: "" },
-  ]);
+  const [portions, setPortions] = useState(1); // was servings
+  const [ingredients, setIngredients] = useState([{ name: "", amount: "", unit: "" }]);
+  const [instructions, setInstructions] = useState([""]);
   const [message, setMessage] = useState("");
 
-  const handleIngChange = (idx, field, value) => {
-    setIngredients((prev) =>
-      prev.map((ing, i) => (i === idx ? { ...ing, [field]: value } : ing))
+  // Ingredient handlers
+  const handleIngredientChange = (idx, field, value) => {
+    setIngredients(ings =>
+      ings.map((ing, i) => (i === idx ? { ...ing, [field]: value } : ing))
     );
   };
+  const addIngredient = () => setIngredients([...ingredients, { name: "", amount: "", unit: "" }]);
+  const removeIngredient = idx => setIngredients(ings => ings.filter((_, i) => i !== idx));
 
-  const addRow = () =>
-    setIngredients((prev) => [...prev, { name: "", amount: "", unit: "" }]);
+  // Instructions handlers
+  const handleInstructionChange = (idx, value) => {
+    setInstructions(ins => ins.map((step, i) => (i === idx ? value : step)));
+  };
+  const addInstruction = () => setInstructions(ins => [...ins, ""]);
+  const removeInstruction = idx => setInstructions(ins => ins.filter((_, i) => i !== idx));
+  const moveInstruction = (idx, dir) => {
+    setInstructions(ins => {
+      const arr = [...ins];
+      const swapIdx = dir === "up" ? idx - 1 : idx + 1;
+      if (swapIdx < 0 || swapIdx >= arr.length) return arr;
+      [arr[idx], arr[swapIdx]] = [arr[swapIdx], arr[idx]];
+      return arr;
+    });
+  };
 
-  const removeRow = (idx) =>
-    setIngredients((prev) => prev.filter((_, i) => i !== idx));
-
-  const handleSubmit = async (e) => {
+  // Submit handler
+  const handleSubmit = async e => {
     e.preventDefault();
     const token = localStorage.getItem("token");
     if (!token) {
       setMessage("❌ You must be logged in");
       return;
     }
-
+    const instructionsString = instructions.filter(s => s.trim()).join("\n");
     const payload = {
       title,
-      instructions,
-      servings,
-      ingredients: ingredients
-        .filter((ing) => ing.name.trim())
-        .map((ing) => ({
-          name: ing.name.trim(),
-          amount: parseFraction(ing.amount), // <-- Use parseFraction here
-          unit: ing.unit.trim(),
-        })),
+      instructions: instructionsString,
+      portions, // 👈 use portions, not servings
+      ingredients: ingredients.filter(ing => ing.name.trim()),
     };
 
     try {
-      const res = await fetch("https://foodbot-backend.onrender.com/recipes/user",{
+      const res = await fetch(`${API_BASE}/recipes/user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,8 +65,8 @@ export default function AddRecipe() {
       if (res.ok) {
         setMessage(`✅ Saved: ${data.title}`);
         setTitle("");
-        setInstructions("");
-        setServings(1);
+        setInstructions([""]);
+        setPortions(1);
         setIngredients([{ name: "", amount: "", unit: "" }]);
       } else {
         setMessage(`❌ ${data.detail || res.statusText}`);
@@ -83,96 +77,95 @@ export default function AddRecipe() {
   };
 
   return (
-    <div className="container">
+    <div className="add-recipe-card">
       <h2>➕ Add Recipe</h2>
       <form onSubmit={handleSubmit}>
-        {/* --- Title and Servings Row --- */}
-        <div style={{ display: "flex", gap: "16px", alignItems: "center", marginBottom: 8 }}>
+        {/* Title and portions */}
+        <div className="row">
           <input
-            placeholder="Title"
+            className="big-input"
+            placeholder="Recipe Title"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={e => setTitle(e.target.value)}
             required
-            className="input-field"
-            style={{ flex: 1, minWidth: 0 }}
           />
-          <label style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ fontWeight: 500 }}>Servings:</span>
+          <div>
+            <label>Portions:</label>
             <input
               type="number"
-              min="1"
-              value={servings}
-              onChange={e => setServings(Number(e.target.value))}
+              min={1}
+              value={portions}
+              onChange={e => setPortions(e.target.value)}
+              className="servings-input"
               required
-              className="input-field"
-              style={{ width: 60 }}
             />
-          </label>
-        </div>
-        <div style={{ marginBottom: 16, marginLeft: 6 }}>
-          <small style={{ color: "#666" }}>
-            How many servings does this recipe make?
-          </small>
-        </div>
-
-        <h4>Ingredients</h4>
-        {ingredients.map((ing, i) => (
-          <div
-            key={i}
-            style={{
-              display: "flex",
-              gap: "0.5rem",
-              marginBottom: "0.5rem",
-              alignItems: "center"
-            }}
-          >
-            <div style={{ width: 220, flexShrink: 0 }}>
-              <FoodSearch
-                value={ing.name}
-                onChange={val => handleIngChange(i, "name", val)}
-                onSelect={item => handleIngChange(i, "name", item.name)}
-              />
+            <div style={{ fontSize: "0.9em", color: "#888" }}>
+              (How many portions/people does this recipe serve?)
             </div>
-            <input
-              placeholder="Amount (e.g. 2, 1.5, 2/3, 1 1/2)"
-              type="text" // <-- changed from number to text
-              value={ing.amount}
-              onChange={(e) => handleIngChange(i, "amount", e.target.value)}
-              className="input-field"
-              style={{ width: "80px", flexShrink: 0 }}
-            />
-            <input
-              placeholder="Unit"
-              value={ing.unit}
-              onChange={(e) => handleIngChange(i, "unit", e.target.value)}
-              className="input-field"
-              style={{ width: "80px", flexShrink: 0 }}
-            />
-            {i > 0 && (
-              <button type="button" onClick={() => removeRow(i)}>
-                –
-              </button>
-            )}
           </div>
-        ))}
-        <button type="button" onClick={addRow} className="button-small">
-          ＋ Add Ingredient
-        </button>
+        </div>
 
-        <h4>Instructions</h4>
-        <textarea
-          placeholder="Step-by-step instructions"
-          value={instructions}
-          onChange={(e) => setInstructions(e.target.value)}
-          required
-          className="input-field"
-        />
+        {/* INGREDIENTS */}
+        <h3>Ingredients</h3>
+        <div className="ingredients-list">
+          {ingredients.map((ing, i) => (
+            <div className="ingredient-row" key={i}>
+              <div className="autocomplete-container">
+                <FoodSearch
+                  value={ing.name}
+                  onChange={val => handleIngredientChange(i, "name", val)}
+                  onSelect={item => handleIngredientChange(i, "name", item.name)}
+                />
+              </div>
+              <input
+                type="text"
+                placeholder="Amount (e.g. 1, 2/3)"
+                value={ing.amount}
+                onChange={e => handleIngredientChange(i, "amount", e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Unit"
+                value={ing.unit}
+                onChange={e => handleIngredientChange(i, "unit", e.target.value)}
+                required
+              />
+              {ingredients.length > 1 && (
+                <button type="button" className="remove-btn" onClick={() => removeIngredient(i)}>
+                  🗑️
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        <button type="button" className="add-btn" onClick={addIngredient}>＋ Add Ingredient</button>
 
-        <button type="submit" className="button">
-          Save Recipe
-        </button>
+        {/* INSTRUCTIONS */}
+        <h3>Instructions</h3>
+        <div className="instructions-list">
+          {instructions.map((step, i) => (
+            <div className="instruction-row" key={i}>
+              <span className="step-number">{i + 1}.</span>
+              <input
+                placeholder={`Step ${i + 1}`}
+                value={step}
+                onChange={e => handleInstructionChange(i, e.target.value)}
+                required
+              />
+              <button type="button" onClick={() => moveInstruction(i, "up")} disabled={i === 0}>⬆️</button>
+              <button type="button" onClick={() => moveInstruction(i, "down")} disabled={i === instructions.length - 1}>⬇️</button>
+              {instructions.length > 1 && (
+                <button type="button" className="remove-btn" onClick={() => removeInstruction(i)}>🗑️</button>
+              )}
+            </div>
+          ))}
+        </div>
+        <button type="button" className="add-btn" onClick={addInstruction}>＋ Add Step</button>
+
+        <button type="submit" className="save-btn">💾 Save Recipe</button>
       </form>
-      {message && <p style={{ marginTop: "1rem" }}>{message}</p>}
+      {message && <div className="success-msg">{message}</div>}
     </div>
   );
 }

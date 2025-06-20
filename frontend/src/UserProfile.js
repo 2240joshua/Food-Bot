@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";  // or a dedicated Profile.css if you prefer
-
+const API_BASE = process.env.REACT_APP_API_BASE;
 function UserProfile({ user: initialUser }) {
   const [user, setUser]   = useState(initialUser);
   const [error, setError] = useState("");
@@ -15,7 +15,7 @@ function UserProfile({ user: initialUser }) {
 
     (async () => {
       try {
-        const res = await fetch("https://foodbot-backend.onrender.com/users/me", {
+        const res = await fetch(`${API_BASE}/users/me`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();

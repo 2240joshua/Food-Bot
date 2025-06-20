@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+const API_BASE = process.env.REACT_APP_API_BASE;
 function Login({ setUser }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -9,7 +9,7 @@ function Login({ setUser }) {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const res = await fetch("https://foodbot-backend.onrender.com/login", {
+    const res = await fetch(`${API_BASE}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -19,7 +19,7 @@ function Login({ setUser }) {
 
     if (res.ok) {
       localStorage.setItem("token", data.access_token);
-      const profileRes = await fetch("https://foodbot-backend.onrender.com/users/me", {
+      const profileRes = await fetch(`${API_BASE}/users/me`, {
         headers: { Authorization: `Bearer ${data.access_token}` },
       });
       const profile = await profileRes.json();
@@ -34,7 +34,7 @@ function Login({ setUser }) {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    const res = await fetch(`https://foodbot-backend.onrender.com/users/`, {
+    const res = await fetch(`${API_BASE}/users/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, name: email, password }),

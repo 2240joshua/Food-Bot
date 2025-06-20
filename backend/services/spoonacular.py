@@ -1,3 +1,4 @@
+#backend/schemas/spoonacular.py
 import sys
 import os
 
@@ -29,7 +30,8 @@ def fetch_recipes(query="", ingredients="", cuisine="", diet="", max_ready_time=
        
         result = []
         for recipe in recipes:
-            nutrition = {n['title'].lower(): n['amount'] for n in recipe.get("nutrition", {}).get("nutrients", [])}
+            nutrition = {n['title'].lower(): n['amount'] for n in recipe.get("nutrition", {}).get("nutrients", []) if 'title' in n}
+
             result.append({
                 "title": recipe.get("title"),
                 "calories": nutrition.get("calories", 0),

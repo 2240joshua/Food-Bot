@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./App.css"; // or RecipeDetail.css if you prefer
-
+const API_BASE = process.env.REACT_APP_API_BASE;
 export default function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ export default function RecipeDetail() {
       return;
     }
 
-    fetch(`https://foodbot-backend.onrender.com/recipes/user/${id}`, {
+    fetch(`${API_BASE}/recipes/user/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {

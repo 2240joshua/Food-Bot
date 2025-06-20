@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import MealSearch     from "./MealSearch";
+
 import MealPlanner    from "./MealPlanner";
 import AddRecipe      from "./AddRecipe";
 import MyRecipes      from "./MyRecipes";
 import ExploreRecipes from "./ExploreRecipes";
 import UserProfile    from "./UserProfile";
 import "./App.css";
-
+const API_BASE = process.env.REACT_APP_API_BASE;
 function DashboardTabs({ user, onLogout }) {
   const [activeTab, setActiveTab]       = useState("profile");
   const [selectedDay, setSelectedDay]   = useState("Monday");
@@ -19,13 +19,13 @@ function DashboardTabs({ user, onLogout }) {
 
     async function loadPlanner() {
       try {
-        const plannerRes = await fetch("https://foodbot-backend.onrender.com/planner/", {
+        const plannerRes = await fetch(`${API_BASE}/planner/`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!plannerRes.ok) throw new Error(`Planner load failed: ${plannerRes.status}`);
         const { plans: idMap } = await plannerRes.json();
 
-        const recipesRes = await fetch("https://foodbot-backend.onrender.com/recipes/user", {
+        const recipesRes = await fetch(`${API_BASE}/recipes/user`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!recipesRes.ok) throw new Error(`Recipes load failed: ${recipesRes.status}`);
@@ -63,7 +63,7 @@ function DashboardTabs({ user, onLogout }) {
     );
 
     const token = localStorage.getItem("token");
-    fetch("https://foodbot-backend.onrender.com/planner/", {
+    fetch(`${API_BASE}/planner/`, {
       method: "POST",
       headers: {
         "Content-Type":  "application/json",
@@ -86,8 +86,6 @@ function DashboardTabs({ user, onLogout }) {
     switch (activeTab) {
       case "profile":
         return <UserProfile user={user} />;
-      case "search":
-        return <MealSearch onAddMeal={addMeal} />;
       case "planner":
         return (
           <MealPlanner
@@ -111,7 +109,6 @@ function DashboardTabs({ user, onLogout }) {
 
   const tabs = [
     ["profile",    "👤 Profile"],
-    ["search",     "🔍 Meal Search"],
     ["planner",    "📅 Planner"],
     ["add_recipe", "➕ Add Recipe"],
     ["my_recipes", "📋 My Recipes"],

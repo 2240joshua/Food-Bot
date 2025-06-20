@@ -1,3 +1,4 @@
+#backend/schemas/user_recipe.py
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -11,6 +12,7 @@ class RecipeCreate(BaseModel):
     instructions: str
     ingredients: List[IngredientIn]
     servings: int = 1   
+
 
 class RecipeRead(BaseModel):
     id: int

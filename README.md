@@ -24,3 +24,10 @@ FoodBot is a full-stack web app for managing recipes, planning weekly meals, and
 - **Auth:** JWT (OAuth2), bcrypt
 - **3rd Party:** Spoonacular API
 
+.\venv\Scripts\Activate.ps1
+cd backend
+uvicorn app:app --reload
+
+cd frontend
+npm run build
+npm start

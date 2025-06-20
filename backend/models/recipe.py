@@ -1,3 +1,4 @@
+#backend/models/recipe.py
 from sqlalchemy import Column, Integer, String, ForeignKey
 from models.database import Base
 

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-
+const API_BASE = process.env.REACT_APP_API_BASE;
 function ExploreRecipes() {
   const [recipes, setRecipes] = useState([]);
 
   useEffect(() => {
     const fetchPublicRecipes = async () => {
-      const res = await fetch("https://foodbot-backend.onrender.com/recipes/public");
+      const res = await fetch(`${API_BASE}/recipes/public`);
       const data = await res.json();
       setRecipes(data);
     };
