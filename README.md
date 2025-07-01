@@ -5,7 +5,7 @@ FoodBot is a full-stack web app for managing recipes, planning weekly meals, and
 
 ---
 
-## ✨ Features
+## Features
 
 - User registration & login (JWT Auth)
 - Personal recipe management – Add, edit, delete your own recipes
@@ -17,7 +17,7 @@ FoodBot is a full-stack web app for managing recipes, planning weekly meals, and
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Backend:** FastAPI, SQLAlchemy, PostgreSQL, python-jose, passlib
 - **Frontend:** React (create-react-app)
