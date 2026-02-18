@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-const API_BASE = process.env.REACT_APP_API_BASE;
+const API_BASE =
+  process.env.REACT_APP_API_BASE || "https://foodbot-backend.onrender.com";
 function Login({ setUser }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
