@@ -19,6 +19,6 @@ urllib3==2.3.0
 uvicorn==0.34.0
 sqlalchemy==2.0.29
 psycopg2-binary==2.9.9
-passlib[bcrypt]==1.7.4
+passlib==1.7.4
 python-jose[cryptography]==3.3.0
 email-validator
