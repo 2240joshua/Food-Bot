@@ -1,6 +1,9 @@
 FROM node:20 as build
-
 WORKDIR /app
+
+# Accept build-time arg from Render, then expose it to CRA build
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
 # Copy ONLY frontend's package.json & lock
 COPY frontend/package.json frontend/package-lock.json* ./
@@ -8,8 +11,8 @@ RUN npm install
 
 # Copy the rest of the frontend app
 COPY frontend/. ./
-RUN echo "BUILD TIME REACT_APP_API_URL: $REACT_APP_API_URL"
 
+RUN echo "BUILD TIME REACT_APP_API_URL: $REACT_APP_API_URL"
 RUN npm run build
 
 FROM nginx:alpine
