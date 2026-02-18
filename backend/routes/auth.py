@@ -11,7 +11,11 @@ from passlib.context import CryptContext
 router = APIRouter()
 
 # Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(
+    schemes=["pbkdf2_sha256", "bcrypt"],
+    deprecated="auto",
+)
+
 
 # Token auth
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
