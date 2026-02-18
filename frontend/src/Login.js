@@ -8,30 +8,29 @@ function Login({ setUser }) {
   const [message, setMessage] = useState("");
 
 
-  const handleLogin = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    const res = await fetch(`${API_BASE}/login`, {
+    const res = await fetch(`${API_BASE}/users/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({
+        name: email,
+        email,
+        password,
+        dietary_preferences: "none",
+      }),
     });
-
+  
     const data = await res.json();
-
+  
     if (res.ok) {
-      localStorage.setItem("token", data.access_token);
-      const profileRes = await fetch(`${API_BASE}/users/me`, {
-        headers: { Authorization: `Bearer ${data.access_token}` },
-      });
-      const profile = await profileRes.json();
-      if (profileRes.ok) {
-        localStorage.setItem("user", JSON.stringify(profile));
-        setUser(profile);
-      }
+      setMessage("✅ Registered! Now login.");
+      setIsRegistering(false);
     } else {
-      setMessage(data.detail || "Login failed");
+      setMessage(data.detail || "Registration failed");
     }
   };
+
 
   const handleRegister = async (e) => {
     e.preventDefault();
